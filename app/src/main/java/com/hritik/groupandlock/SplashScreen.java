@@ -34,7 +34,7 @@ public class SplashScreen extends AppCompatActivity {
                 //default_val is used if there is no key then it will return default_val.
                 Boolean imgSett = sharedpreferences.getBoolean(flag_var,default_val);
                 if (imgSett==true){
-                    Intent i = new Intent(SplashScreen.this, MainActivity.class);
+                    Intent i = new Intent(SplashScreen.this, LockScreen.class);
                     startActivity(i);
                     finish();
                 }

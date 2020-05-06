@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tool="http://schemas.android.com/tools"
     package="com.hritik.groupandlock">
+
+    <uses-permission
+        android:name="android.permission.PACKAGE_USAGE_STATS"
+        tool:ignore="ProtectedPermissions"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+
 
     <application
         android:allowBackup="true"
@@ -9,7 +17,17 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".AppInsertion"></activity>
+        <service android:enabled="true" android:name=".BackgroundServices"/>
+        <receiver android:name=".RestartService">
+
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+
+        </receiver>
+        <activity android:name=".LockScreen"/>
+        <activity android:name=".AppInsertion" />
         <activity android:name=".AppSection" />
         <activity android:name=".GetPassScreen" />
         <activity android:name=".MainActivity" />

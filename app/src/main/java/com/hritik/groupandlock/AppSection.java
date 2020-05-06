@@ -142,7 +142,6 @@ public class AppSection extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_section);
-
         Intent intent=getIntent();
         sect = intent.getStringExtra("section");
         add=findViewById(R.id.sadd_btn);

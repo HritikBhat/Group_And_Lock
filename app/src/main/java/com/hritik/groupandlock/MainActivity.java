@@ -3,6 +3,7 @@ package com.hritik.groupandlock;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlertDialog;
 import android.content.ContentValues;
 import android.content.Context;
@@ -28,6 +29,16 @@ public class MainActivity extends AppCompatActivity {
     ListAdapterMain adapter;
     ArrayList<String> name;
     final Context context=this;
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
     private void insertGrp(String grp_nm){
         MyHelper dpHelper = new MyHelper(this);
@@ -55,6 +66,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        if (!isMyServiceRunning(BackgroundServices.class)){
+            startService(new Intent(getBaseContext(), BackgroundServices.class));
+        }
         name=new ArrayList<String>();
         addGroups();
         add=findViewById(R.id.add_btn);
