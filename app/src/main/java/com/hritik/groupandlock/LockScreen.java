@@ -71,6 +71,9 @@ public class LockScreen extends AppCompatActivity {
             public void onTextChanged(CharSequence s, int start, int before, int count) {}
         });
     }
+    @Override
+    public void onBackPressed() {
+    }
 }
 /*
 if((!printForegroundTask().equals("com.hritik.groupandlock"))  &&  flag2 == 0 ) {
