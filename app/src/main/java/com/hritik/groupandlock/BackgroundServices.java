@@ -145,7 +145,7 @@ public class BackgroundServices extends Service {
                             flag=1;
                             Intent lockIntent = new Intent(mContext, LockScreen.class);
                             lockIntent.putExtra("pack", printForegroundTask());
-                            lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
                             mContext.startActivity(lockIntent);
                         }
 
