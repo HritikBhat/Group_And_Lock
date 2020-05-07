@@ -12,9 +12,13 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import java.util.concurrent.locks.Lock;
+
 public class LockScreen extends AppCompatActivity {
     EditText pin;
     String pkgnm,ps="";
+    Bundle savedInstanceState2;
+    boolean lockopen=false;
     Intent i;
 
     private boolean isPassValid(){
@@ -31,7 +35,7 @@ public class LockScreen extends AppCompatActivity {
     }
 
     private void isOtherAppExist(){
-        pkgnm=i.getStringExtra("pack");
+        //lockopen=true;
         if (pkgnm!=null){
             Intent launchIntent = getPackageManager().getLaunchIntentForPackage(pkgnm);
             if(launchIntent!=null){
@@ -50,9 +54,10 @@ public class LockScreen extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_lock_screen);
-
+        savedInstanceState2=savedInstanceState;
         pin=findViewById(R.id.chkpin);
         i = getIntent();
+        pkgnm=i.getStringExtra("pack");
         pin.addTextChangedListener(new TextWatcher() {
 
             public void afterTextChanged(Editable s) {
@@ -74,6 +79,22 @@ public class LockScreen extends AppCompatActivity {
     @Override
     public void onBackPressed() {
     }
+    /*
+    @Override
+    protected void onPause(){
+        super.onPause();
+        if (!lockopen){
+            Intent settingsIntent = new Intent(this, LockScreen.class);
+            settingsIntent.putExtra("pack",pkgnm);
+            startActivity(settingsIntent);
+            //finish();
+            }
+    }
+
+     */
+
+
+
 }
 /*
 if((!printForegroundTask().equals("com.hritik.groupandlock"))  &&  flag2 == 0 ) {

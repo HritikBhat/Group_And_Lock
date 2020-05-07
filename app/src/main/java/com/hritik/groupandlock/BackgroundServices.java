@@ -5,20 +5,34 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
+import android.graphics.PixelFormat;
+import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
+
+import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.Gravity;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.ImageView;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedMap;
@@ -36,10 +50,14 @@ public class BackgroundServices extends Service {
 
     // flag is used for stopping or running loop check of    // current app running
     static  int flag = 0;
+    static int start_counter=0;
     static int flag2 = 0;
     // when any app is launch and it have password set on it    // that app name save in current_app varaible
     String current_app = "";
+    String prev_app = "";
     public BackgroundServices (){}
+
+
     @Override    public void onCreate() {
         super.onCreate();
         // add context of NotificationService to mContext variable
@@ -48,6 +66,7 @@ public class BackgroundServices extends Service {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O)
             startMyOwnForeground();
         else            startForeground(1, new Notification());
+
     }
 
     //  oreo api approach
@@ -65,9 +84,11 @@ public class BackgroundServices extends Service {
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
         Notification notification = notificationBuilder.setOngoing(true)
                 .setContentTitle("App is running in background")
-                .setPriority(NotificationManager.IMPORTANCE_MIN)
+                .setPriority(manager.IMPORTANCE_HIGH)
+                .setDefaults(NotificationCompat.DEFAULT_VIBRATE)
                 .setCategory(Notification.CATEGORY_SERVICE)
                 .build();
+
         startForeground(2, notification);
     }
 
@@ -101,23 +122,39 @@ public class BackgroundServices extends Service {
                     ArrayList<String> name = new ArrayList<String>();
                     while (res.moveToNext()) {
                         // add data to list
-                        Log.i("Count", "=========  " + printForegroundTask());
+                        Log.i("Count", "=========  " + getRecentApps(mContext));
+                        //Log.i("Status","========--"+isAppRunning(mContext,printForegroundTask()));
                         name.add(res.getString(2));
                     }
                     // if current app have password set on it                    // lanuch lock screen
-                    if (name.contains(printForegroundTask())) {
+                    if (name.contains(getRecentApps(mContext))) {
                         // flag = 1 means stop loop
-                        flag = 1;
                         current_app = printForegroundTask();
-                        Intent lockIntent = new Intent(mContext, LockScreen.class);
-                        lockIntent.putExtra("pack", printForegroundTask());
-                        lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                        mContext.startActivity(lockIntent);
+                        if (start_counter<6){
+                            if (start_counter==0){
+                            prev_app=current_app;
+                            start_counter+=1;
+                            }
+                            else{
+                                if (prev_app.equals(printForegroundTask())){
+                                    start_counter+=1;
+                                }
+                            }
+                        }
+                        else {
+                            flag=1;
+                            Intent lockIntent = new Intent(mContext, LockScreen.class);
+                            lockIntent.putExtra("pack", printForegroundTask());
+                            lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                            mContext.startActivity(lockIntent);
+                        }
+
                     }
                 }
                 if (flag==1){
                         if ((!printForegroundTask().equals(current_app))) {
                             flag = 0;
+                            start_counter=0;
                         }
                 }
                 if (printForegroundTask().equals("com.hritik.groupandlock")) {
@@ -145,6 +182,38 @@ public class BackgroundServices extends Service {
                 return null;
             }
 
+
+    public String getRecentApps(Context context) {
+        String topPackageName = "";
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            UsageStatsManager mUsageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+
+            long time = System.currentTimeMillis();
+
+            UsageEvents usageEvents = mUsageStatsManager.queryEvents(time - 1000 * 30, System.currentTimeMillis() + (10 * 1000));
+            UsageEvents.Event event = new UsageEvents.Event();
+            while (usageEvents.hasNextEvent()) {
+                usageEvents.getNextEvent(event);
+            }
+
+            if (event != null && !TextUtils.isEmpty(event.getPackageName()) && event.getEventType() == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+                if (AndroidUtils.isRecentActivity(event.getClassName())) {
+                    return event.getClassName();
+                }
+                return event.getPackageName();
+            } else {
+                topPackageName = "";
+            }
+        } else {
+            ActivityManager am = (ActivityManager)this.getSystemService(Context.ACTIVITY_SERVICE);
+            List<ActivityManager.RunningAppProcessInfo> tasks = am.getRunningAppProcesses();
+            topPackageName = tasks.get(0).processName;
+        }
+
+
+        return topPackageName;
+    }
 
             // get string of current app running
             private String printForegroundTask() {
