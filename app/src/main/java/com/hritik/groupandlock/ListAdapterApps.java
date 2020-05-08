@@ -50,6 +50,11 @@ public class ListAdapterApps extends ArrayAdapter<String> {
         return false;
     }
 
+    public int getAppsCount(){
+        MyHelper dbhelper=new MyHelper(context);
+        return dbhelper.getAppSectionCount(sect);
+    }
+
     public  void insertAppDB(int pos){
         String appname=name.get(pos);
         String pkgname=pkgnm.get(pos);
@@ -85,11 +90,16 @@ public class ListAdapterApps extends ArrayAdapter<String> {
                     Toast.makeText(context,"The App Already Exists In The Group.",Toast.LENGTH_LONG).show();
                 }
                 else{
+                    if (getAppsCount()>=15){
+                        Toast.makeText(context,"Group can take maximum 15 apps.",Toast.LENGTH_LONG).show();
+                    }
+                    else{
                     insertAppDB(position);
                     Intent i = new Intent(context,AppSection.class);
                     i.putExtra("section",sect);
                     context.startActivity(i);
                     context.finish();
+                }
                 }
             }
         });

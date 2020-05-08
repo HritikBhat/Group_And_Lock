@@ -59,8 +59,8 @@ public class MyHelper extends SQLiteOpenHelper
         return cursor;
     }
 
-    public int getRows(){
-        String countQuery = "SELECT  * FROM callmg";
+    public int getAppSectionCount(String sect){
+        String countQuery = "SELECT  * FROM app_dts WHERE grp_name='"+sect+"'";
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor cursor = db.rawQuery(countQuery, null);
         int count = cursor.getCount();

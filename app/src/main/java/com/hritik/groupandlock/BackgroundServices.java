@@ -4,6 +4,7 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
@@ -16,6 +17,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
@@ -39,6 +41,8 @@ import java.util.SortedMap;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.TreeMap;
+
+
 public class BackgroundServices extends Service {
     private BroadcastReceiver receiver;
     public int counter=0;
@@ -63,9 +67,10 @@ public class BackgroundServices extends Service {
         // add context of NotificationService to mContext variable
         mContext = this;
         // oreo used different approach for background services        // other use same approach
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O)
+        if (Build.VERSION.SDK_INT >=Build.VERSION_CODES.O)
             startMyOwnForeground();
-        else            startForeground(1, new Notification());
+        else
+            startForeground(1, new Notification());
 
     }
 
@@ -80,13 +85,23 @@ public class BackgroundServices extends Service {
         chan.setLockscreenVisibility(Notification.VISIBILITY_PRIVATE);
         NotificationManager manager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         assert manager != null;
+        int requestID = (int) System.currentTimeMillis();
+
+
+        /*
+        Intent notificationIntent = new Intent(mContext,LockScreen.class);
+        notificationIntent.putExtra("pack","AppInfo");
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
+
+        //**edit this line to put requestID as requestCode**
+        PendingIntent contentIntent = PendingIntent.getActivity(this, requestID,notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        */
+
         manager.createNotificationChannel(chan);
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID);
         Notification notification = notificationBuilder.setOngoing(true)
                 .setContentTitle("App is running in background")
-                .setPriority(manager.IMPORTANCE_HIGH)
                 .setDefaults(NotificationCompat.DEFAULT_VIBRATE)
-                .setCategory(Notification.CATEGORY_SERVICE)
                 .build();
 
         startForeground(2, notification);
