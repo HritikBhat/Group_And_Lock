@@ -81,20 +81,18 @@ public class LockScreen extends AppCompatActivity {
     private void isOtherAppExist(){
         //lockopen=true;
         if (pkgnm!=null){
-            if (pkgnm.equals("AppInfo")){
-                Intent appinfo=new Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                appinfo.addCategory(Intent.CATEGORY_DEFAULT);
-                appinfo.setData(Uri.parse("package:" + getPackageName()));
-                startActivity(appinfo);
+            if (pkgnm.equals("NAP")){
                 finish();
             }
+            /*
             else {
             Intent launchIntent = getPackageManager().getLaunchIntentForPackage(pkgnm);
             if(launchIntent!=null){
                 startActivity(launchIntent);
                 finish();
-            }
-            }
+            }}
+
+             */
         }
         else{
             Intent i2 = new Intent(this, MainActivity.class);

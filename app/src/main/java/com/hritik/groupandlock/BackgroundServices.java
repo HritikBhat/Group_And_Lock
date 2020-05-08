@@ -141,7 +141,7 @@ public class BackgroundServices extends Service {
                         //Log.i("Status","========--"+isAppRunning(mContext,printForegroundTask()));
                         name.add(res.getString(2));
                     }
-                    // if current app have password set on it                    // lanuch lock screen
+                                     // if current app have password set on it                    // lanuch lock screen
                     if (name.contains(getRecentApps(mContext))) {
                         // flag = 1 means stop loop
                         current_app = printForegroundTask();
@@ -159,7 +159,9 @@ public class BackgroundServices extends Service {
                         else {
                             flag=1;
                             Intent lockIntent = new Intent(mContext, LockScreen.class);
-                            lockIntent.putExtra("pack", printForegroundTask());
+                            //NAP means Not A Package
+                            lockIntent.putExtra("pack", "NAP");
+                            //lockIntent.putExtra("pack", printForegroundTask());
                             lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
                             mContext.startActivity(lockIntent);
                         }
@@ -196,6 +198,38 @@ public class BackgroundServices extends Service {
             @Nullable    @Override    public IBinder onBind(Intent intent) {
                 return null;
             }
+
+
+    /*public String getRecentActivity(Context context) {
+        String topActivityName = "";
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            UsageStatsManager mUsageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
+
+            long time = System.currentTimeMillis();
+
+            UsageEvents usageEvents = mUsageStatsManager.queryEvents(time - 1000 * 30, System.currentTimeMillis() + (10 * 1000));
+            UsageEvents.Event event = new UsageEvents.Event();
+            while (usageEvents.hasNextEvent()) {
+                usageEvents.getNextEvent(event);
+            }
+
+            if (event != null && !TextUtils.isEmpty(event.getPackageName()) && event.getEventType() == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+                return event.getClassName();
+            } else {
+                topActivityName = "";
+            }
+        } else {
+            ActivityManager am = (ActivityManager)this.getSystemService(Context.ACTIVITY_SERVICE);
+            List<ActivityManager.RunningAppProcessInfo> tasks = am.getRunningAppProcesses();
+            topActivityName = tasks.get(0).processName;
+        }
+
+
+        return topActivityName;
+    }
+
+     */
 
 
     public String getRecentApps(Context context) {
