@@ -119,8 +119,10 @@ public class LockScreen extends AppCompatActivity {
                     isOtherAppExist();
                 }
                 else {
+
                     if (pin.getText().toString().length()==4)
                     {Toast.makeText(getApplicationContext(),"Invalid Pin.Try Again",Toast.LENGTH_LONG).show();
+                    pin.setText("");
                 }
                 }
             }

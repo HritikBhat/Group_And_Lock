@@ -8,7 +8,10 @@ import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.DrawableContainer;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.Adapter;
+import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -18,26 +21,24 @@ import java.util.List;
 public class AppInsertion extends AppCompatActivity {
     ListAdapterApps adapter;
     ListView list;
-    ArrayList<String> name,pkg;
-    ArrayList<Drawable> dw;
+    ArrayList<ListItem> lt;
+    EditText search;
     String sect;
 
     private void getAllApps(){
         Intent mainIntent= new Intent(Intent.ACTION_MAIN,null);
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-
         List<ResolveInfo> pkgAppList=this.getPackageManager().queryIntentActivities(mainIntent,0);
         System.out.println(pkgAppList.size());
         for(ResolveInfo resolve_info : pkgAppList) {
             try {
                 String package_name = resolve_info.activityInfo.packageName;
-                pkg.add(package_name);
                 String app_name = (String) getPackageManager().getApplicationLabel(
                         getPackageManager().getApplicationInfo(package_name
                                 , PackageManager.GET_META_DATA));
-                name.add(app_name);
                 Drawable app_icon= getPackageManager().getApplicationIcon(package_name);
-                dw.add(app_icon);
+                ListItem inf= new ListItem(app_name,app_icon,package_name);
+                lt.add(inf);
             }catch (Exception e){e.printStackTrace();}
         }
     }
@@ -46,17 +47,27 @@ public class AppInsertion extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_app_insertion);
-        name=new ArrayList<String>();
-        pkg=new ArrayList<String>();
-        dw=new ArrayList<Drawable>();
+        search = findViewById(R.id.search);
+        lt = new ArrayList<ListItem>();
         Intent intn= getIntent();
         sect=intn.getStringExtra("sect");
         getAllApps();
-        System.out.println("Installed Apps: "+name.size());
         try {
-            adapter = new ListAdapterApps(this, name,dw,pkg,sect);
+            adapter = new ListAdapterApps(this,lt,sect);
             list = findViewById(R.id.app_listview);
             list.setAdapter(adapter);
         }catch (Exception e){e.printStackTrace();}
+        search.addTextChangedListener(new TextWatcher() {
+
+            public void afterTextChanged(Editable s) {
+                adapter.filter(search.getText().toString());
+            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
     }
 }

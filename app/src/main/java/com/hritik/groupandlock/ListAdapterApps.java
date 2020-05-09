@@ -18,36 +18,53 @@ package com.hritik.groupandlock;
         import androidx.cardview.widget.CardView;
 
         import java.util.ArrayList;
+        import java.util.Locale;
 
-public class ListAdapterApps extends ArrayAdapter<String> {
+public class ListAdapterApps extends ArrayAdapter<ListItem> {
     private final Activity context;
-    ArrayList<String> name,pkgnm;
-    ArrayList<Drawable> icon;
+    ArrayList<ListItem> listitem;
     String sect;
-    public ListAdapterApps(Activity context,ArrayList<String> name,ArrayList<Drawable> icon,ArrayList<String> pkgnm,String section) {
-        super(context, R.layout.app_list,name);
+    private ArrayList<ListItem> myList;  // for loading main list
+    private ArrayList<ListItem> arraylist=null;  // for loading  filter data
+    public ListAdapterApps(Activity context,ArrayList<ListItem> lt,String section) {
+        super(context, R.layout.app_list,lt);
         // TODO Auto-generated constructor stub
         this.context=context;
-        this.name=name;
-        this.icon=icon;
-        this.pkgnm=pkgnm;
+        this.listitem=lt;
         this.sect=section;
-        /*System.out.println("Installed inside adapter: "+icon.size());
-        System.out.println("App Name: "+name.get(0));
-        System.out.println("Package Name: "+pkgnm.get(0));
-         */
+        this.myList=lt;
+        this.arraylist = new ArrayList<ListItem>();
+        this.arraylist.addAll(lt);
     }
 
     private boolean isAppAlreadyExists(int pos){
         MyHelper dpHelper = new MyHelper(context);
         Cursor cursor = dpHelper.getCondnData("app_dts",sect);
+        ListItem lt= listitem.get(pos);
         while (cursor.moveToNext()) {
             String appnm=cursor.getString(cursor.getColumnIndex("app_name"));
-            if (appnm.equals(name.get(pos))){
+            if (appnm.equals(lt.getappname())){
                 return true;
             }
         }
         return false;
+    }
+
+    public void filter(String charText) {
+        charText = charText.toLowerCase(Locale.getDefault());
+        myList.clear();
+        if (charText.length() == 0) {
+            myList.addAll(arraylist);
+        }
+        else
+        {
+            for (ListItem wp : arraylist) {
+                if (wp.getappname().toLowerCase(Locale.getDefault()).contains(charText)) {
+                    myList.add(wp);
+                }
+            }
+        }
+        notifyDataSetChanged();
     }
 
     public int getAppsCount(){
@@ -56,8 +73,9 @@ public class ListAdapterApps extends ArrayAdapter<String> {
     }
 
     public  void insertAppDB(int pos){
-        String appname=name.get(pos);
-        String pkgname=pkgnm.get(pos);
+        ListItem lt= listitem.get(pos);
+        String appname=lt.getappname();
+        String pkgname=lt.getpkgname();
         String grpname=sect;
 
         MyHelper dpHelper = new MyHelper(context);
@@ -75,10 +93,11 @@ public class ListAdapterApps extends ArrayAdapter<String> {
         LayoutInflater inflater=context.getLayoutInflater();
         View rowView=inflater.inflate(R.layout.app_list, null,true);
         final View vw=view;
+        ListItem lt= listitem.get(position);
         TextView nameText = rowView.findViewById(R.id.appname);
-        nameText.setText(name.get(position));
+        nameText.setText(lt.getappname());
         ImageView img= rowView.findViewById(R.id.imgview);
-        img.setImageDrawable(icon.get(position));
+        img.setImageDrawable(lt.getapppicture());
         CardView cardv = rowView.findViewById(R.id.card2);
         cardv.setOnClickListener(new View.OnClickListener() {
             @Override
