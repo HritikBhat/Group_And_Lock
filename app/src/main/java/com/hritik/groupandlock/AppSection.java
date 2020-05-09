@@ -156,7 +156,6 @@ public class AppSection extends AppCompatActivity {
                 Intent i = new Intent(getApplicationContext(),AppInsertion.class);
                 i.putExtra("sect",sect);
                 startActivity(i);
-                finish();
 
             }
         });

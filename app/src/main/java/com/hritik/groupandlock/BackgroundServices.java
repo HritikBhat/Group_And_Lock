@@ -4,37 +4,22 @@ import android.app.ActivityManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.app.usage.UsageStatsManager;
 import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
-import android.graphics.PixelFormat;
-import android.net.Uri;
-import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
-
-import android.os.RemoteException;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.Gravity;
-import android.view.MotionEvent;
-import android.view.View;
-import android.view.WindowManager;
-import android.widget.ImageView;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedMap;
@@ -92,7 +77,6 @@ public class BackgroundServices extends Service {
         Intent notificationIntent = new Intent(mContext,LockScreen.class);
         notificationIntent.putExtra("pack","AppInfo");
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS);
-
         //**edit this line to put requestID as requestCode**
         PendingIntent contentIntent = PendingIntent.getActivity(this, requestID,notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         */
@@ -141,14 +125,14 @@ public class BackgroundServices extends Service {
                         //Log.i("Status","========--"+isAppRunning(mContext,printForegroundTask()));
                         name.add(res.getString(2));
                     }
-                                     // if current app have password set on it                    // lanuch lock screen
+                    // if current app have password set on it                    // lanuch lock screen
                     if (name.contains(getRecentApps(mContext))) {
                         // flag = 1 means stop loop
                         current_app = printForegroundTask();
                         if (start_counter<6){
                             if (start_counter==0){
-                            prev_app=current_app;
-                            start_counter+=1;
+                                prev_app=current_app;
+                                start_counter+=1;
                             }
                             else{
                                 if (prev_app.equals(printForegroundTask())){
@@ -169,51 +153,47 @@ public class BackgroundServices extends Service {
                     }
                 }
                 if (flag==1){
-                        if ((!printForegroundTask().equals(current_app))) {
-                            flag = 0;
-                            start_counter=0;
-                        }
+                    if ((!printForegroundTask().equals(current_app))) {
+                        flag = 0;
+                        start_counter=0;
+                    }
                 }
                 if (printForegroundTask().equals("com.hritik.groupandlock")) {
                     flag = 2;
                 }
                 if (flag==2){
                     if (!printForegroundTask().equals("com.hritik.groupandlock")) {
-                    flag=1;
-                    current_app=printForegroundTask();
+                        flag=1;
+                        current_app=printForegroundTask();
                     }
-                    }
+                }
 
                 // Log.i("Count", "=========  "+ printForegroundTask());
-                }
-            };
+            }
+        };
         timer.schedule(timerTask, 0, 100);
+    }
+    public void stoptimertask() {
+        if (timer != null) {
+            timer.cancel();
+            timer = null;
         }
-            public void stoptimertask() {
-                if (timer != null) {
-                    timer.cancel();
-                    timer = null;
-                }
-            }
-            @Nullable    @Override    public IBinder onBind(Intent intent) {
-                return null;
-            }
+    }
+    @Nullable    @Override    public IBinder onBind(Intent intent) {
+        return null;
+    }
 
 
     /*public String getRecentActivity(Context context) {
         String topActivityName = "";
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             UsageStatsManager mUsageStatsManager = (UsageStatsManager) context.getSystemService(Context.USAGE_STATS_SERVICE);
-
             long time = System.currentTimeMillis();
-
             UsageEvents usageEvents = mUsageStatsManager.queryEvents(time - 1000 * 30, System.currentTimeMillis() + (10 * 1000));
             UsageEvents.Event event = new UsageEvents.Event();
             while (usageEvents.hasNextEvent()) {
                 usageEvents.getNextEvent(event);
             }
-
             if (event != null && !TextUtils.isEmpty(event.getPackageName()) && event.getEventType() == UsageEvents.Event.MOVE_TO_FOREGROUND) {
                 return event.getClassName();
             } else {
@@ -224,11 +204,8 @@ public class BackgroundServices extends Service {
             List<ActivityManager.RunningAppProcessInfo> tasks = am.getRunningAppProcesses();
             topActivityName = tasks.get(0).processName;
         }
-
-
         return topActivityName;
     }
-
      */
 
 
@@ -264,28 +241,28 @@ public class BackgroundServices extends Service {
         return topPackageName;
     }
 
-            // get string of current app running
-            private String printForegroundTask() {
-            String currentApp = "NULL";
-            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                UsageStatsManager usm = (UsageStatsManager) this.getSystemService(Context.USAGE_STATS_SERVICE);
-                long time = System.currentTimeMillis();
-                List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,  time - 1000*1000, time);
-                if (appList != null && appList.size() > 0) {
-                    SortedMap<Long, UsageStats> mySortedMap = new TreeMap<Long, UsageStats>();
-                    for (UsageStats usageStats : appList) {
-                        mySortedMap.put(usageStats.getLastTimeUsed(), usageStats);
-                    }
-                    if (mySortedMap != null && !mySortedMap.isEmpty()) {
-                        currentApp = mySortedMap.get(mySortedMap.lastKey()).getPackageName();
-                    }
+    // get string of current app running
+    private String printForegroundTask() {
+        String currentApp = "NULL";
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            UsageStatsManager usm = (UsageStatsManager) this.getSystemService(Context.USAGE_STATS_SERVICE);
+            long time = System.currentTimeMillis();
+            List<UsageStats> appList = usm.queryUsageStats(UsageStatsManager.INTERVAL_DAILY,  time - 1000*1000, time);
+            if (appList != null && appList.size() > 0) {
+                SortedMap<Long, UsageStats> mySortedMap = new TreeMap<Long, UsageStats>();
+                for (UsageStats usageStats : appList) {
+                    mySortedMap.put(usageStats.getLastTimeUsed(), usageStats);
                 }
-            } else {
-                ActivityManager am = (ActivityManager)this.getSystemService(Context.ACTIVITY_SERVICE);
-                List<ActivityManager.RunningAppProcessInfo> tasks = am.getRunningAppProcesses();
-                currentApp = tasks.get(0).processName;
+                if (mySortedMap != null && !mySortedMap.isEmpty()) {
+                    currentApp = mySortedMap.get(mySortedMap.lastKey()).getPackageName();
+                }
             }
-            // Log.e("AppLockerService", "Current App in foreground is: " + currentApp)
-                return currentApp;
+        } else {
+            ActivityManager am = (ActivityManager)this.getSystemService(Context.ACTIVITY_SERVICE);
+            List<ActivityManager.RunningAppProcessInfo> tasks = am.getRunningAppProcesses();
+            currentApp = tasks.get(0).processName;
         }
+        // Log.e("AppLockerService", "Current App in foreground is: " + currentApp)
+        return currentApp;
     }
+}

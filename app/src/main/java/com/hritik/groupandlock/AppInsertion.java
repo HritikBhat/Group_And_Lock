@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.DrawableContainer;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -28,15 +29,16 @@ public class AppInsertion extends AppCompatActivity {
     private void getAllApps(){
         Intent mainIntent= new Intent(Intent.ACTION_MAIN,null);
         mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
-        List<ResolveInfo> pkgAppList=this.getPackageManager().queryIntentActivities(mainIntent,0);
+        PackageManager ps=this.getPackageManager();
+        List<ResolveInfo> pkgAppList=ps.queryIntentActivities(mainIntent,0);
         System.out.println(pkgAppList.size());
         for(ResolveInfo resolve_info : pkgAppList) {
             try {
                 String package_name = resolve_info.activityInfo.packageName;
-                String app_name = (String) getPackageManager().getApplicationLabel(
-                        getPackageManager().getApplicationInfo(package_name
+                String app_name = (String) ps.getApplicationLabel(
+                        ps.getApplicationInfo(package_name
                                 , PackageManager.GET_META_DATA));
-                Drawable app_icon= getPackageManager().getApplicationIcon(package_name);
+                Drawable app_icon= ps.getApplicationIcon(package_name);
                 ListItem inf= new ListItem(app_name,app_icon,package_name);
                 lt.add(inf);
             }catch (Exception e){e.printStackTrace();}
